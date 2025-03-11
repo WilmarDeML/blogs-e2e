@@ -38,4 +38,16 @@ describe('Blog app', () => {
       await expect(errorDiv).toHaveCSS('color', 'rgb(255, 0, 0)')
     })
   })
+
+  describe('when logged in', () => {
+    beforeEach(async ({ page }) => {
+      await loginWith(page, 'mluukkai', 'salainen')
+    })
+
+    test('a new blog can be created', async ({ page }) => {
+      await createBlog(page, 'a blog created by playwright', 'playwright', 'https://playwright.dev')
+      const location = page.locator('.blog').getByText('a blog created by playwright')
+      await expect(location).toBeVisible()
+    })
+  })
 })
