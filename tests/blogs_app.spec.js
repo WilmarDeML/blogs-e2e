@@ -3,8 +3,8 @@ const { loginWith, createBlog } = require('./helper')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
-    await request.post('http:localhost:3003/api/testing/reset')
-    await request.post('http://localhost:3003/api/users', {
+    await request.post('/api/testing/reset')
+    await request.post('/api/users', {
       data: {
         name: 'Matti Luukkainen',
         username: 'mluukkai',
@@ -13,7 +13,7 @@ describe('Blog app', () => {
       
     })
 
-    await page.goto('http://localhost:5173')
+    await page.goto('/')
   })
 
   test('Login form is shown', async ({ page }) => {
@@ -49,5 +49,21 @@ describe('Blog app', () => {
       const location = page.locator('.blog').getByText('a blog created by playwright')
       await expect(location).toBeVisible()
     })
+
+    describe('and a blog exists', () => {
+      beforeEach(async ({ page }) => {
+        await createBlog(page, 'another blog by playwright', 'playwright', 'https://playwright.dev')
+      })
+  
+      test('likes can be changed', async ({ page }) => {
+        await page.getByRole('button', { name: 'view' }).click()
+        await page.getByRole('button', { name: 'like' }).click()
+        await page.waitForTimeout(200);
+        await page.getByRole('button', { name: 'like' }).click()
+        await page.waitForTimeout(200);
+        await expect(page.getByText('likes: 2')).toBeVisible();
+      })
+    })
   })
+
 })
