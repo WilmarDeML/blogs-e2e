@@ -63,6 +63,19 @@ describe('Blog app', () => {
         await page.waitForTimeout(200);
         await expect(page.getByText('likes: 2')).toBeVisible();
       })
+
+      test('blog can be deleted by creator', async ({ page }) => {
+        page.on('dialog', async dialog => {
+          await dialog.accept()
+        })
+
+        await page.getByRole('button', { name: 'view' }).click()
+        const location = page.locator('.blog').getByText('another blog by playwright')
+        await expect(location).toBeVisible()
+        await page.getByRole('button', { name: 'remove' }).click()
+        await page.waitForTimeout(200);
+        await expect(location).not.toBeVisible()
+      })
     })
   })
 
