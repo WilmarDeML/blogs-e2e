@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { loginWith, createBlog, createUser } = require('./helper')
+const { loginWith, createBlog, createUser, addLikes } = require('./helper')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -81,6 +81,33 @@ describe('Blog app', () => {
         
         await page.getByRole('button', { name: 'view' }).click()
         await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
+      })
+    })
+
+    describe('and a list of blogs exists', () => {
+      beforeEach(async ({ page }) => {
+        await createBlog(page, '1 blog by playwright', 'playwright', 'https://playwright.dev')
+        await page.waitForTimeout(200)
+        await createBlog(page, '2 blog by playwright', 'playwright', 'https://playwright.dev')
+        await page.waitForTimeout(200)
+        await createBlog(page, '3 blog by playwright', 'playwright', 'https://playwright.dev')
+        await page.waitForTimeout(200)
+        await createBlog(page, '4 blog by playwright', 'playwright', 'https://playwright.dev')
+        await page.waitForTimeout(200)
+      })
+  
+      test('the list of blogs are ordered by likes number', async ({ page }) => {
+        await addLikes(page, '1 blog by playwright', 1)
+        await addLikes(page, '2 blog by playwright', 2)
+        await addLikes(page, '3 blog by playwright', 3)
+        await addLikes(page, '4 blog by playwright', 4)
+
+        const blogs = await page.locator('.blog').all()
+
+        await expect(blogs[0]).toContainText('4 blog by playwright')
+        await expect(blogs[1]).toContainText('3 blog by playwright')
+        await expect(blogs[2]).toContainText('2 blog by playwright')
+        await expect(blogs[3]).toContainText('1 blog by playwright')
       })
     })
   })
